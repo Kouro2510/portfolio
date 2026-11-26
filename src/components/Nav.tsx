@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { RollText } from "./fx";
 
 const LINKS = [
   { href: "#about", label: "About" },
@@ -57,7 +58,7 @@ export default function Nav() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-[background,border-color,backdrop-filter] duration-500 ${
+        className={`slide-down fixed inset-x-0 top-0 z-50 transition-[background,border-color,backdrop-filter] duration-500 ${
           scrolled || open
             ? "border-b border-line bg-bg/70 backdrop-blur-xl"
             : "border-b border-transparent"
@@ -78,11 +79,11 @@ export default function Nav() {
               <a
                 key={l.href}
                 href={l.href}
-                className={`link-sweep pb-1 font-mono text-xs uppercase tracking-[0.18em] transition-colors ${
+                className={`link-sweep pb-1 font-mono text-[13px] uppercase tracking-[0.14em] transition-colors ${
                   active === l.href ? "text-ink" : "text-mute hover:text-ink"
                 }`}
               >
-                {l.label}
+                <RollText>{l.label}</RollText>
               </a>
             ))}
           </nav>

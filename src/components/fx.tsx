@@ -17,13 +17,18 @@ const finePointer = () =>
   window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
 /* ---------- Reveal on scroll ---------- */
+export type RevealFrom = "up" | "left" | "right" | "scale" | "clip" | "fade";
+
 export function Reveal({
   children,
   delay = 0,
+  from = "up",
   className = "",
 }: {
   children: ReactNode;
   delay?: number;
+  /** Direction the block slides in from. "clip" wipes it in from the bottom. */
+  from?: RevealFrom;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -45,11 +50,101 @@ export function Reveal({
   return (
     <div
       ref={ref}
+      data-from={from === "up" ? undefined : from}
       className={`reveal ${className}`}
       style={{ "--d": `${delay}ms` } as CSSProperties}
     >
       {children}
     </div>
+  );
+}
+
+/* ---------- Words sliding up out of a mask (use inside <Reveal>) ---------- */
+/** A string is plain words; [text, className] styles those words; "\n" is a line break. */
+export type MaskPart = string | [string, string];
+
+export function MaskWords({ parts }: { parts: MaskPart[] }) {
+  let i = 0;
+  const out: ReactNode[] = [];
+  parts.forEach((part, p) => {
+    if (part === "\n") {
+      out.push(<br key={`br${p}`} />);
+      return;
+    }
+    const [text, cls] = typeof part === "string" ? [part, ""] : part;
+    for (const word of text.split(" ").filter(Boolean)) {
+      out.push(
+        <span key={i} className="mw">
+          <span className={cls} style={{ "--i": i } as CSSProperties}>
+            {word}
+          </span>
+        </span>,
+        " ",
+      );
+      i++;
+    }
+  });
+  return <>{out}</>;
+}
+
+/* ---------- Horizontal slide linked to scroll position ---------- */
+export function ScrollSlide({
+  children,
+  speed = 0.2,
+  origin = "center",
+  className = "",
+}: {
+  children: ReactNode;
+  /** px of horizontal travel per px scrolled; negative slides left. */
+  speed?: number;
+  /** "center": 0 when the element is mid-viewport. "top": 0 at page top (hero only). */
+  origin?: "center" | "top";
+  className?: string;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || reduced()) return;
+    let raf = 0;
+    let visible = false;
+    const update = () => {
+      raf = 0;
+      const r = el.getBoundingClientRect();
+      const base =
+        origin === "top" ? window.scrollY : window.innerHeight / 2 - (r.top + r.height / 2);
+      el.style.transform = `translate3d(${(base * speed).toFixed(1)}px,0,0)`;
+    };
+    const onScroll = () => {
+      if (visible && !raf) raf = requestAnimationFrame(update);
+    };
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible) onScroll();
+    });
+    io.observe(el);
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [speed, origin]);
+  return (
+    <span ref={ref} className={`block will-change-transform ${className}`}>
+      {children}
+    </span>
+  );
+}
+
+/* ---------- Text that rolls to a copy of itself when its link/button is hovered ---------- */
+export function RollText({ children }: { children: string }) {
+  return (
+    <span className="roll">
+      <span data-text={children}>{children}</span>
+    </span>
   );
 }
 

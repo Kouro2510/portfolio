@@ -68,10 +68,10 @@ export default function Terminal() {
         <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
         <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
         <span className="h-3 w-3 rounded-full bg-[#28c840]" />
-        <span className="ml-3 font-mono text-xs text-mute">phuong@prod-cluster — zsh</span>
+        <span className="ml-3 font-mono text-xs text-mute lg:text-[13px]">phuong@prod-cluster — zsh</span>
       </div>
       <div
-        className="min-h-[17.5rem] whitespace-pre-wrap break-words p-4 font-mono text-[12px] leading-relaxed sm:text-[13px]"
+        className="min-h-[17.5rem] whitespace-pre-wrap break-words p-4 font-mono text-[12px] leading-relaxed sm:text-[13px] lg:min-h-[16.5rem] lg:text-sm short:min-h-[15.5rem] short:text-[13px]"
         aria-label="Terminal summary: full-stack developer, 4 years, 15+ services managed, synced and healthy"
       >
         {lines.map((l, i) => (
